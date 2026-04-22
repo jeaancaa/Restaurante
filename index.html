@@ -371,7 +371,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[150px] md:auto-rows-[200px]">
                 <!-- Imagen Grande (Ocupa 2 filas y 2 columnas) -->
                 <div class="col-span-2 row-span-2 overflow-hidden rounded-lg shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" alt="Plato destacado">
+                    <img src="https://images.unsplash.com/photo-1544025162-8315ea07f239?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" alt="Plato destacado">
                 </div>
                 <!-- Imagen Cuadrada Normal -->
                 <div class="overflow-hidden rounded-lg shadow-sm">
@@ -426,13 +426,19 @@
                     <p class="text-sm text-gray-600">E-mail: <a href="mailto:info@restaurante.com" class="hover:text-brand-maroon transition">info@restaurante.com</a></p>
                 </div>
 
-                <!-- Caja 3: Ubicación -->
-                <div class="bg-white p-8 shadow-sm text-center flex flex-col justify-start">
+                <!-- Caja 3: Ubicación y Cómo llegar -->
+                <div class="bg-white p-8 shadow-sm text-center flex flex-col justify-start items-center">
                     <h3 class="text-lg font-serif text-gray-800 mb-6 uppercase">Ubicación</h3>
-                    <p class="text-sm text-gray-600 mb-4">Avinguda calle, 3</p>
-                    <p class="text-sm text-gray-600">08490 Tordera - barcelona</p>
-                    <p class="text-sm text-gray-600">Tel. 00000000000</p>
+                    <p class="text-sm text-gray-600 mb-1">Calle de la Gastronomía, 123</p>
+                    <p class="text-sm text-gray-600 mb-6">08001 Barcelona</p>
 
+                    <h4 class="text-md font-serif text-brand-maroon mb-2">Cómo llegar</h4>
+                    
+                    <!-- Botón elegante a Google Maps (Abre la App de navegación) -->
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=Calle+de+la+Gastronomia+123+08001+Barcelona" target="_blank" rel="noopener noreferrer" class="group flex flex-col items-center justify-center w-full p-4 mt-2 bg-brand-bg border border-gray-200 rounded-lg hover:border-brand-maroon hover:shadow-md transition-all duration-300 cursor-pointer text-brand-maroon">
+                        <svg class="w-8 h-8 mb-2 transform group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span class="font-sans text-sm font-semibold text-gray-700 group-hover:text-brand-maroon transition-colors">Abrir en el mapa</span>
+                    </a>
                 </div>
 
             </div>
