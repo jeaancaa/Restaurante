@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Nombre</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-maroon': '#8b1c4b',
+                        'brand-bg': '#f8f5f0',
+                        'brand-text': '#5a5a5a'
+                    },
+                    fontFamily: {
+                        'serif': ['"Playfair Display"', 'serif'],
+                        'sans': ['"Open Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos para el carrusel y transiciones suaves */
+        .carousel-item {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+        .carousel-item.active {
+            opacity: 1;
+            z-index: 1;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #8b1c4b;
+        }
+        /* Ocultar barra de Google Translate y evitar salto en la cabecera */
+        body { top: 0 !important; }
+        .skiptranslate iframe { display: none !important; }
+        #goog-gt-tt { display: none !important; }
+    </style>
+</head>
+<body class="bg-brand-bg text-brand-text font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- Navegación -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-24">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                    <!-- Placeholder para el logo real -->
+                    <div class="w-16 h-16 rounded-full border-2 border-brand-maroon flex items-center justify-center text-brand-maroon font-serif font-bold text-xs text-center leading-tight">
+                        nombre <br>nombre
+                    </div>
+                </div>
+
+                <!-- Menú Horizontal (Desktop) -->
+                <nav class="hidden md:flex space-x-8 text-sm font-semibold tracking-wide text-gray-700">
+                    <a href="#inicio" class="nav-link active text-brand-maroon uppercase">Inicio</a>
+                    <a href="#historia" class="nav-link uppercase">Restauración</a>
+                    <a href="#carta" class="nav-link uppercase">Carta</a>
+                    
+                    <a href="#footer" class="nav-link uppercase">Contactanos</a>
+                </nav>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Selector de Idioma Personalizado -->
+                    <div class="relative z-50">
+                        <button id="custom-lang-btn" class="flex items-center space-x-1 text-gray-700 hover:text-brand-maroon font-semibold focus:outline-none transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span id="current-lang">ES</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <!-- Menú desplegable -->
+                        <div id="custom-lang-dropdown" class="hidden absolute right-0 mt-2 w-32 bg-white border border-gray-100 rounded-md shadow-lg overflow-hidden">
+                            <button onclick="changeLanguage('es', 'ES')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-brand-maroon hover:text-white transition">Español</button>
+                            <button onclick="changeLanguage('ca', 'CA')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-brand-maroon hover:text-white transition">Catalán</button>
+                            <button onclick="changeLanguage('en', 'EN')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-brand-maroon hover:text-white transition">Inglés</button>
+                            <button onclick="changeLanguage('fr', 'FR')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-brand-maroon hover:text-white transition">Francés</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenedor oculto para el widget original feo de Google -->
+                    <div class="overflow-hidden w-0 h-0 opacity-0 absolute">
+                        <div id="google_translate_element"></div>
+                    </div>
+
+                    <!-- Menú Hamburguesa (Mobile) -->
+                    <div class="md:hidden flex items-center">
+                        <button id="mobile-menu-btn" class="text-gray-700 hover:text-brand-maroon focus:outline-none">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Menú desplegable Mobile -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <a href="#inicio" class="block px-4 py-2 text-sm text-brand-maroon font-semibold">INICIO</a>
+            <a href="#historia" class="block px-4 py-2 text-sm text-gray-700">RESTAURACIÓN</a>
+            <a href="#horarios" class="block px-4 py-2 text-sm text-gray-700">CELEBRACIONES</a>
+            <a href="#horarios" class="block px-4 py-2 text-sm text-gray-700">JORNADAS GASTRONÓMICAS</a>
+            <a href="#footer" class="block px-4 py-2 text-sm text-gray-700">CONTÁCTANOS</a>
+        </div>
+    </header>
+
+    <!-- Carrusel Hero (Inicio) -->
+    <section id="inicio" class="relative h-[70vh] md:h-[80vh] w-full bg-gray-900 flex items-center justify-center overflow-hidden">
+        <!-- Imágenes del carrusel -->
+        <div id="carousel">
+            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Interior Restaurante" class="carousel-item active">
+            <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Plato Gastronómico" class="carousel-item">
+            <img src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Terraza Restaurante" class="carousel-item">
+        </div>
+        
+        <!-- Overlay oscuro para que resalte el texto -->
+        <div class="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+
+        <!-- Contenido Central -->
+        <div class="relative z-20 text-center flex flex-col items-center">
+            <div class="bg-white bg-opacity-90 p-8 rounded-lg shadow-2xl border-t-4 border-brand-maroon">
+                <div class="w-24 h-24 mx-auto mb-4 rounded-full border-2 border-brand-maroon flex items-center justify-center text-brand-maroon font-serif font-bold text-lg text-center leading-tight">
+                    nombre<br>nombre
+                </div>
+                <h1 class="text-3xl md:text-5xl font-serif text-gray-800 tracking-wider">Restaurant Nombre</h1>
+                <p class="mt-4 text-gray-600 font-light tracking-widest uppercase text-sm">Tradición y vanguardia</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Historia -->
+    <section id="historia" class="py-20 px-4 bg-white">
+        <div class="max-w-3xl mx-auto text-center">
+            <h2 class="text-3xl font-serif text-brand-maroon mb-6 uppercase tracking-wider">Nuestra Historia</h2>
+            <div class="w-16 h-0.5 bg-brand-maroon mx-auto mb-8"></div>
+            <p class="text-gray-600 leading-relaxed text-lg">
+                Desde nuestros inicios, en el Restaurant Nombre hemos dedicado nuestra pasión a ofrecer una experiencia gastronómica inolvidable. Ubicados en un entorno privilegiado, combinamos los sabores tradicionales de nuestra tierra con técnicas culinarias modernas. Nuestro compromiso es seleccionar los mejores ingredientes de temporada para llevar a tu mesa platos llenos de historia, sabor y cariño. Un rincón donde cada comida se convierte en una celebración.
+            </p>
+        </div>
+    </section>
+
+    <!-- Sección Carta -->
+    <section id="carta" class="py-20 px-4 bg-brand-bg">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-serif text-brand-maroon mb-6 uppercase tracking-wider">Nuestra Carta</h2>
+                <div class="w-16 h-0.5 bg-brand-maroon mx-auto"></div>
+            </div>
+
+            <!-- Grid de Platos a 2 columnas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12">
+                
+                <!-- Tapas -->
+                <div>
+                    <h3 class="text-2xl font-serif text-gray-800 border-b-2 border-brand-maroon pb-2 mb-6">Tapas</h3>
+                    <ul class="space-y-6">
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Croquetas caseras de jamón ibérico <span class="text-xs font-normal text-brand-maroon ml-1">(GL, LA, HU)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">8,00€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Con bechamel cremosa y jamón de bellota.</p>
+                        </li>
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Patatas bravas tradicionales <span class="text-xs font-normal text-brand-maroon ml-1">(HU)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">6,50€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Con nuestra salsa brava secreta y alioli suave.</p>
+                        </li>
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Gambas al ajillo <span class="text-xs font-normal text-brand-maroon ml-1">(CR)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">12,00€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Salteadas con aceite de oliva virgen extra y guindilla.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Ensaladas -->
+                <div>
+                    <h3 class="text-2xl font-serif text-gray-800 border-b-2 border-brand-maroon pb-2 mb-6">Ensaladas</h3>
+                    <ul class="space-y-6">
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Ensalada César con pollo crujiente <span class="text-xs font-normal text-brand-maroon ml-1">(GL, LA, HU, SE)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">11,00€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Lechuga romana, picatostes, parmesano y salsa César.</p>
+                        </li>
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Ensalada de burrata y tomate asado <span class="text-xs font-normal text-brand-maroon ml-1">(LA)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">13,50€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Con pesto de albahaca y piñones tostados.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Pasta y arroz -->
+                <div>
+                    <h3 class="text-2xl font-serif text-gray-800 border-b-2 border-brand-maroon pb-2 mb-6">Pasta y Arroz</h3>
+                    <ul class="space-y-6">
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Paella marinera tradicional <span class="text-xs font-normal text-brand-maroon ml-1">(CR, PE, MO)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">16,00€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Precio por persona. Mínimo 2 personas.</p>
+                        </li>
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Tagliatelle al tartufo <span class="text-xs font-normal text-brand-maroon ml-1">(GL, LA, HU)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">14,00€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Pasta fresca con salsa cremosa de trufa negra.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Vegetariano -->
+                <div>
+                    <h3 class="text-2xl font-serif text-gray-800 border-b-2 border-brand-maroon pb-2 mb-6">Vegetariano</h3>
+                    <ul class="space-y-6">
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Canelones de espinacas y ricotta <span class="text-xs font-normal text-brand-maroon ml-1">(GL, LA)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">12,50€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Gratinados con bechamel suave y queso emmental.</p>
+                        </li>
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Curry de garbanzos con verduras <span class="text-xs font-normal text-brand-maroon ml-1">(SO)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">11,50€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Con leche de coco y arroz basmati. (Opción Vegana).</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Hamburguesas -->
+                <div>
+                    <h3 class="text-2xl font-serif text-gray-800 border-b-2 border-brand-maroon pb-2 mb-6">Hamburguesas</h3>
+                    <ul class="space-y-6">
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Hamburguesa Black Angus <span class="text-xs font-normal text-brand-maroon ml-1">(GL, LA, HU)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">14,50€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">200g de ternera, queso cheddar, cebolla caramelizada y patatas fritas.</p>
+                        </li>
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Hamburguesa de pollo crujiente <span class="text-xs font-normal text-brand-maroon ml-1">(GL, LA, SE)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">12,50€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Pechuga empanada, lechuga, tomate y mayonesa suave.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Pescados -->
+                <div>
+                    <h3 class="text-2xl font-serif text-gray-800 border-b-2 border-brand-maroon pb-2 mb-6">Pescados</h3>
+                    <ul class="space-y-6">
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Lomo de salmón al horno <span class="text-xs font-normal text-brand-maroon ml-1">(PE)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">18,00€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Acompañado de espárragos trigueros a la plancha.</p>
+                        </li>
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Bacalao confitado <span class="text-xs font-normal text-brand-maroon ml-1">(PE)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">19,50€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Confitado a baja temperatura sobre cama de pisto.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Carne -->
+                <div>
+                    <h3 class="text-2xl font-serif text-gray-800 border-b-2 border-brand-maroon pb-2 mb-6">Carne</h3>
+                    <ul class="space-y-6">
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Entrecot de ternera a la parrilla</h4>
+                                <span class="font-semibold text-gray-800 ml-4">22,00€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">400g de carne madurada con guarnición de patatas asadas.</p>
+                        </li>
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Costillar de cerdo a la barbacoa <span class="text-xs font-normal text-brand-maroon ml-1">(SO)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">17,00€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Asado lentamente para que la carne se desprenda del hueso.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Postres -->
+                <div>
+                    <h3 class="text-2xl font-serif text-gray-800 border-b-2 border-brand-maroon pb-2 mb-6">Postres</h3>
+                    <ul class="space-y-6">
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Tarta de queso cremosa <span class="text-xs font-normal text-brand-maroon ml-1">(GL, LA, HU)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">6,50€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Nuestra tarta casera horneada al estilo vasco.</p>
+                        </li>
+                        <li>
+                            <div class="flex justify-between items-baseline">
+                                <h4 class="font-bold text-gray-800 text-lg">Coulant de chocolate <span class="text-xs font-normal text-brand-maroon ml-1">(GL, LA, HU, FS)</span></h4>
+                                <span class="font-semibold text-gray-800 ml-4">7,00€</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Corazón fundido, servido con helado de vainilla.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Leyenda de Alérgenos -->
+            <div class="mt-20 pt-8 border-t border-gray-300">
+                <h4 class="text-lg font-serif text-gray-800 mb-4 text-center">Información sobre Alérgenos</h4>
+                <div class="flex flex-wrap justify-center gap-3 text-xs text-gray-600">
+                    <span class="bg-white border border-gray-200 px-3 py-1 rounded shadow-sm"><strong class="text-brand-maroon">(GL)</strong> Gluten</span>
+                    <span class="bg-white border border-gray-200 px-3 py-1 rounded shadow-sm"><strong class="text-brand-maroon">(LA)</strong> Lácteos</span>
+                    <span class="bg-white border border-gray-200 px-3 py-1 rounded shadow-sm"><strong class="text-brand-maroon">(HU)</strong> Huevo</span>
+                    <span class="bg-white border border-gray-200 px-3 py-1 rounded shadow-sm"><strong class="text-brand-maroon">(CR)</strong> Crustáceos</span>
+                    <span class="bg-white border border-gray-200 px-3 py-1 rounded shadow-sm"><strong class="text-brand-maroon">(PE)</strong> Pescado</span>
+                    <span class="bg-white border border-gray-200 px-3 py-1 rounded shadow-sm"><strong class="text-brand-maroon">(MO)</strong> Moluscos</span>
+                    <span class="bg-white border border-gray-200 px-3 py-1 rounded shadow-sm"><strong class="text-brand-maroon">(SO)</strong> Soja</span>
+                    <span class="bg-white border border-gray-200 px-3 py-1 rounded shadow-sm"><strong class="text-brand-maroon">(SE)</strong> Sésamo</span>
+                    <span class="bg-white border border-gray-200 px-3 py-1 rounded shadow-sm"><strong class="text-brand-maroon">(FS)</strong> Frutos de cáscara</span>
+                </div>
+                <p class="text-center text-xs text-gray-500 mt-4 italic">Si tiene alguna otra alergia o intolerancia alimentaria, por favor, avise a nuestro personal.</p>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Sección Collage / Galería de Platos -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-serif text-brand-maroon mb-6 uppercase tracking-wider">Nuestra Cocina</h2>
+                <div class="w-16 h-0.5 bg-brand-maroon mx-auto"></div>
+            </div>
+            
+            <!-- Grid del Collage (Se adapta automáticamente a móviles y PC) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[150px] md:auto-rows-[200px]">
+                <!-- Imagen Grande (Ocupa 2 filas y 2 columnas) -->
+                <div class="col-span-2 row-span-2 overflow-hidden rounded-lg shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" alt="Plato destacado">
+                </div>
+                <!-- Imagen Cuadrada Normal -->
+                <div class="overflow-hidden rounded-lg shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" alt="Carne">
+                </div>
+                <!-- Imagen Cuadrada Normal -->
+                <div class="overflow-hidden rounded-lg shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" alt="Postre">
+                </div>
+                <!-- Imagen Apaisada (Ocupa 2 columnas) -->
+                <div class="col-span-2 overflow-hidden rounded-lg shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" alt="Mesa de comida">
+                </div>
+                <!-- Imagen Cuadrada Normal -->
+                <div class="overflow-hidden rounded-lg shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" alt="Pasta fresca">
+                </div>
+                <!-- Imagen Cuadrada Normal -->
+                <div class="overflow-hidden rounded-lg shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1499028344343-cd173ffc68a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" alt="Pescado">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Horarios, Info y Boletín (Fiel a la imagen) -->
+    <section id="horarios" class="relative py-16 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1466978913421-bac2e565d879?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+        <!-- Overlay claro para simular el efecto de la imagen -->
+        <div class="absolute inset-0 bg-[#f8f5f0] bg-opacity-80"></div>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Caja 1: Horario -->
+                <div class="bg-white p-8 shadow-sm text-center">
+                    <h3 class="text-lg font-serif text-gray-800 mb-6 uppercase">Horario de Apertura del Restaurante</h3>
+                    <ul class="text-sm text-gray-600 space-y-4 font-medium">
+                        <li><span class="text-gray-800 font-bold">Lunes:</span> de 13:00 h a 16:00 h</li>
+                        <li><span class="text-gray-800 font-bold">Martes:</span> de 13:00 h a 16:00 h</li>
+                        <li><span class="text-gray-800 font-bold">Miércoles:</span> <span class="font-bold text-gray-800">cerrado</span></li>
+                        <li><span class="text-gray-800 font-bold">Jueves:</span> de 13:00 h a 16:00 h</li>
+                        <li><span class="text-gray-800 font-bold">Viernes:</span> de 13:00 h a 16:00 h y de 20:00 h a 23:00 h</li>
+                        <li><span class="text-gray-800 font-bold">Sábado:</span> de 13:00 h a 16:00 h y de 20:00 h a 23:00 h</li>
+                        <li><span class="text-gray-800 font-bold">Domingo:</span> de 13:00 h a 16:00 h</li>
+                    </ul>
+                </div>
+
+                <!-- Caja 2: Info y Reservas -->
+                <div class="bg-white p-8 shadow-sm text-center flex flex-col justify-start">
+                    <h3 class="text-lg font-serif text-gray-800 mb-6 uppercase">Información y Reservas</h3>
+                    <p class="text-sm text-gray-600 mb-4">Teléfono: +34 972 367 963</p>
+                    <p class="text-sm text-gray-600">E-mail: <a href="mailto:info@restaurante.com" class="hover:text-brand-maroon transition">info@restaurante.com</a></p>
+                </div>
+
+                <!-- Caja 3: Ubicación -->
+                <div class="bg-white p-8 shadow-sm text-center flex flex-col justify-start">
+                    <h3 class="text-lg font-serif text-gray-800 mb-6 uppercase">Ubicación</h3>
+                    <p class="text-sm text-gray-600 mb-4">Avinguda calle, 3</p>
+                    <p class="text-sm text-gray-600">08490 Tordera - barcelona</p>
+                    <p class="text-sm text-gray-600">Tel. 00000000000</p>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Completo -->
+    <footer id="footer" class="pb-32 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Botón de subir arriba y Legales -->
+            <div class="mt-8 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
+                <div class="text-xs text-gray-400 flex space-x-4 mb-4 md:mb-0">
+                    <button onclick="openModal('modal-privacidad')" class="hover:text-brand-maroon focus:outline-none transition">Política de Privacidad</button>
+                    <span>|</span>
+                    <button onclick="openModal('modal-cookies')" class="hover:text-brand-maroon focus:outline-none transition">Política de Cookies</button>
+                    <span>|</span>
+                    <button onclick="openModal('modal-aviso-legal')" class="hover:text-brand-maroon focus:outline-none transition">Aviso Legal</button>
+                </div>
+                <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-full p-2 focus:outline-none transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- BANNER DE COOKIES (Funcional con LocalStorage) -->
+    <div id="cookie-banner" class="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 shadow-lg z-50 transform translate-y-full transition-transform duration-500">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between text-sm">
+            <div class="mb-4 md:mb-0 md:mr-4 text-center md:text-left">
+                Utilizamos cookies propias y de terceros para mejorar nuestros servicios y mostrarle publicidad relacionada con sus preferencias mediante el análisis de sus hábitos de navegación. Si continúa navegando, consideramos que acepta su uso. Puede obtener más información en nuestra <button onclick="openModal('modal-cookies')" class="underline text-brand-maroon hover:text-white transition focus:outline-none">Política de cookies</button>.
+            </div>
+            <div class="flex space-x-3 flex-shrink-0">
+                <button id="btn-reject-cookies" class="bg-transparent border border-white hover:bg-white hover:text-gray-900 text-white font-semibold py-2 px-4 rounded transition">Rechazar</button>
+                <button id="btn-accept-cookies" class="bg-brand-maroon hover:bg-[#70163c] text-white font-semibold py-2 px-4 rounded transition">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales para Políticas (Ocultos por defecto) -->
+    <div id="modal-cookies" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto relative">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-serif text-brand-maroon">Política de Cookies</h2>
+                <button onclick="closeModal('modal-cookies')" class="text-gray-500 hover:text-gray-800 text-2xl absolute top-4 right-4 focus:outline-none">&times;</button>
+            </div>
+            <div class="text-sm text-gray-600 space-y-3">
+                <p>Una cookie es un pequeño fichero de texto que se almacena en su navegador cuando visita casi cualquier página web. Su utilidad es que la web sea capaz de recordar su visita cuando vuelva a navegar por esa página.</p>
+                <p><strong>Cookies utilizadas en este sitio web:</strong><br> - Cookies técnicas necesarias para el funcionamiento de la web.<br> - Cookies de personalización.</p>
+                <p>Puede usted permitir, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones del navegador instalado en su ordenador.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-aviso-legal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto relative">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-serif text-brand-maroon">Aviso Legal</h2>
+                <button onclick="closeModal('modal-aviso-legal')" class="text-gray-500 hover:text-gray-800 text-2xl absolute top-4 right-4 focus:outline-none">&times;</button>
+            </div>
+            <div class="text-sm text-gray-600 space-y-3">
+                <p>En cumplimiento de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), informamos a todos los usuarios y visitantes sobre los datos legales de la empresa.</p>
+                <p>Las condiciones de acceso y uso de este sitio web se rigen estrictamente por la legalidad vigente y por el principio de buena fe comprometiéndose el usuario a realizar un buen uso de la web. Quedan prohibidos todos los actos que vulneren la legalidad, derechos o intereses de terceros.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-privacidad" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto relative">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-serif text-brand-maroon">Política de Privacidad</h2>
+                <button onclick="closeModal('modal-privacidad')" class="text-gray-500 hover:text-gray-800 text-2xl absolute top-4 right-4 focus:outline-none">&times;</button>
+            </div>
+            <div class="text-sm text-gray-600 space-y-3">
+                <p>En cumplimiento del Reglamento (UE) 2016/679 General de Protección de Datos (RGPD) y la Ley Orgánica 3/2018 de Protección de Datos Personales, le informamos que los datos personales recogidos en esta web serán tratados con la máxima confidencialidad.</p>
+                <p>La finalidad de la recogida de datos es únicamente para gestionar las consultas, reservas o el envío de información solicitada. Sus datos no serán cedidos a terceros salvo obligación legal.</p>
+                <p>Puede ejercer sus derechos de acceso, rectificación, supresión y oposición contactando con nosotros a través de los medios indicados en la sección de contacto de esta misma página web.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS LÓGICA FRONTEND -->
+    <script>
+        // 1. Lógica del Carrusel de Imágenes
+        document.addEventListener('DOMContentLoaded', () => {
+            const items = document.querySelectorAll('.carousel-item');
+            let currentIndex = 0;
+
+            setInterval(() => {
+                items[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % items.length;
+                items[currentIndex].classList.add('active');
+            }, 5000); // Cambia la imagen cada 5 segundos
+        });
+
+        // 2. Menú Móvil Hamburger
+        const btnMenu = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        btnMenu.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Cerrar menú móvil al hacer clic en un enlace
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+
+        // 3. Lógica del Banner de Cookies (100% Funcional sin plugins de pago)
+        const cookieBanner = document.getElementById('cookie-banner');
+        const btnAccept = document.getElementById('btn-accept-cookies');
+        const btnReject = document.getElementById('btn-reject-cookies');
+
+        // Comprobar si ya se ha tomado una decisión previamente
+        setTimeout(() => {
+            if (!localStorage.getItem('cookiesAccepted')) {
+                // Mostrar banner deslizando hacia arriba
+                cookieBanner.classList.remove('translate-y-full');
+            }
+        }, 1000); // Pequeño retraso para que la carga sea elegante
+
+        const hideBanner = (accepted) => {
+            cookieBanner.classList.add('translate-y-full');
+            localStorage.setItem('cookiesAccepted', accepted ? 'true' : 'false');
+            // Aquí podrías inyectar Google Analytics si accepted === true
+        };
+
+        btnAccept.addEventListener('click', () => hideBanner(true));
+        btnReject.addEventListener('click', () => hideBanner(false));
+
+        // 4. Lógica de los Modales (Políticas)
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Cerrar modal haciendo clic fuera
+        window.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('[id^="modal-"]');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            });
+        });
+
+        // 5. Lógica del Selector de Idioma Personalizado
+        const langBtn = document.getElementById('custom-lang-btn');
+        const langDropdown = document.getElementById('custom-lang-dropdown');
+        const currentLangLabel = document.getElementById('current-lang');
+
+        if (langBtn && langDropdown) {
+            langBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                langDropdown.classList.toggle('hidden');
+            });
+
+            // Cierra el menú al hacer clic fuera de él
+            document.addEventListener('click', (e) => {
+                if (!langBtn.contains(e.target) && !langDropdown.contains(e.target)) {
+                    langDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // Función que conecta el menú bonito con el widget oculto de Google
+        function changeLanguage(langCode, displayLang) {
+            const selectField = document.querySelector(".goog-te-combo");
+            if (selectField) {
+                selectField.value = langCode;
+                selectField.dispatchEvent(new Event('change'));
+                currentLangLabel.textContent = displayLang;
+            }
+            langDropdown.classList.add('hidden');
+        }
+    </script>
+    
+    <!-- Script de Google Translate -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'es',
+                includedLanguages: 'es,ca,en,fr',
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+</html>
